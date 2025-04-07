@@ -46,6 +46,9 @@
       box-shadow: 0 0 40px limegreen;
       transition: transform 0.1s linear;
       z-index: 2;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(2); /* Anfangs größer */
     }
 
     #wind {
@@ -120,7 +123,20 @@
       margin-top: 20px;
     }
 
-    /* Berechtigungs-Popup mit minimalen Änderungen */
+    /* Countdown Anzeige */
+    #countdown {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 120px;
+      color: white;
+      z-index: 20;
+      display: none;
+      text-shadow: 0 0 20px rgba(255,255,255,0.8);
+    }
+
+    /* Berechtigungs-Popup */
     #permissionPopup {
       position: fixed;
       top: 0;
@@ -148,7 +164,7 @@
   </style>
 </head>
 <body>
-  <!-- Minimales Berechtigungs-Popup -->
+  <!-- Berechtigungs-Popup -->
   <div id="permissionPopup">
     <h2>Sensorzugriff benötigt</h2>
     <p>Bitte erlauben Sie den Zugriff auf die Sensordaten.</p>
@@ -157,6 +173,7 @@
   
   <button id="startButton">START</button>
   <div id="scores"></div>
+  <div id="countdown"></div>
 
   <div id="gameArea">
     <div class="ring" style="width: 900px; height: 900px;"></div>
@@ -181,6 +198,7 @@
     const scoresEl = document.getElementById('scores');
     const permissionPopup = document.getElementById('permissionPopup');
     const permissionButton = document.getElementById('permissionButton');
+    const countdownEl = document.getElementById('countdown');
 
     let x = window.innerWidth / 2;
     let y = window.innerHeight / 2;
@@ -220,8 +238,27 @@
       }
     }
 
-    function startGame() {
+    function startCountdown() {
       startButton.style.display = 'none';
+      ball.style.transform = 'translate(-50%, -50%) scale(1)'; // Ball auf normale Größe
+      
+      let count = 3;
+      countdownEl.textContent = count;
+      countdownEl.style.display = 'block';
+      
+      const countdownInterval = setInterval(() => {
+        count--;
+        countdownEl.textContent = count;
+        
+        if (count <= 0) {
+          clearInterval(countdownInterval);
+          countdownEl.style.display = 'none';
+          startGame();
+        }
+      }, 1000);
+    }
+
+    function startGame() {
       x = window.innerWidth / 2;
       y = window.innerHeight / 2;
       updateBallPosition();
@@ -298,17 +335,15 @@
     }
 
     permissionButton.onclick = requestPermission;
-    startButton.onclick = startGame;
+    startButton.onclick = startCountdown; // Geändert zu startCountdown
 
     restartButton.onclick = () => {
       gameOver.style.display = 'none';
       x = window.innerWidth / 2;
       y = window.innerHeight / 2;
       speed = 0.5;
-      updateBallPosition();
-      active = true;
-      startTime = Date.now();
-      requestAnimationFrame(gameLoop);
+      ball.style.transform = 'translate(-50%, -50%) scale(2)'; // Ball wieder groß
+      startButton.style.display = 'block'; // Start-Button wieder anzeigen
     };
 
     setInterval(() => {
