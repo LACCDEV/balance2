@@ -12,8 +12,6 @@
       color: white;
       font-family: sans-serif;
       text-align: center;
-      height: 100vh;
-      width: 100vw;
     }
 
     #title {
@@ -39,13 +37,10 @@
 
     #gameArea {
       position: absolute;
-      width: 900px;
-      height: 900px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
       overflow: hidden;
-      border-radius: 50%;
     }
 
     .ring {
@@ -96,13 +91,15 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 48px;
-      background: none;
-      color: white;
+      font-size: 32px;
+      padding: 15px 40px;
+      background: white;
+      color: black;
       border: none;
+      border-radius: 12px;
       cursor: pointer;
       z-index: 21;
-      text-shadow: 0 0 10px white;
+      box-shadow: 0 0 20px limegreen;
     }
 
     #countdown {
@@ -147,7 +144,7 @@
   <div id="title">Leitz Balance Board</div>
   <div id="scores"></div>
 
-  <button id="startButton">START</button>
+  <button id="startButton">Start</button>
   <div id="countdown"></div>
 
   <div id="gameArea">
@@ -172,10 +169,9 @@
     const countdownEl = document.getElementById('countdown');
     const restartButton = document.getElementById('restartButton');
     const scoresEl = document.getElementById('scores');
-    const gameArea = document.getElementById('gameArea');
 
-    let x = 450;
-    let y = 450;
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
     let speed = 0.5;
     let active = false;
     let startTime = 0;
@@ -211,13 +207,11 @@
           countdownEl.style.display = 'none';
           scoresEl.style.display = 'block';
 
-          // Ball klein und zentriert
+          // Ball klein machen fürs Spiel
           ball.style.width = '100px';
           ball.style.height = '100px';
-          x = 450;
-          y = 450;
-          ball.style.left = `${x - 50}px`;
-          ball.style.top = `${y - 50}px`;
+          x = window.innerWidth / 2;
+          y = window.innerHeight / 2;
 
           active = true;
           startTime = Date.now();
@@ -240,11 +234,13 @@
       x += tiltX * speed + windForce.x;
       y += tiltY * speed + windForce.y;
 
-      const dx = x - 450;
-      const dy = y - 450;
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const dx = x - cx;
+      const dy = y - cy;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance > 450) {
+      if (distance > 400) {
         active = false;
         const finalTime = ((Date.now() - startTime)/1000).toFixed(1);
         gameOverText.innerText = `Game Over! Zeit: ${finalTime}s`;
@@ -291,8 +287,8 @@
 
     restartButton.onclick = () => {
       gameOver.style.display = 'none';
-      x = 450;
-      y = 450;
+      x = window.innerWidth / 2;
+      y = window.innerHeight / 2;
       speed = 0.5;
       ball.style.left = `${x - 50}px`;
       ball.style.top = `${y - 50}px`;
