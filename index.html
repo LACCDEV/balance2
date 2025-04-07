@@ -12,12 +12,35 @@
       color: white;
       font-family: sans-serif;
       text-align: center;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    #title {
+      position: absolute;
+      top: 20px;
+      width: 100%;
+      font-size: 24px;
+      font-weight: bold;
+      z-index: 10;
+    }
+
+    #scores {
+      position: absolute;
+      top: 60px;
+      width: 100%;
+      font-size: 24px;
+      z-index: 10;
+      background: rgba(0,0,0,0.7);
+      padding: 10px 0;
+      line-height: 1.6;
+      display: none;
     }
 
     #gameArea {
       position: absolute;
-      width: 1600px;
-      height: 1600px;
+      width: 900px;
+      height: 900px;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -39,13 +62,14 @@
       position: absolute;
       width: 70vw;
       height: 70vw;
-      max-width: 300px;
-      max-height: 300px;
       background: limegreen;
       border-radius: 50%;
       box-shadow: 0 0 40px limegreen;
-      transition: transform 0.1s linear;
+      transition: all 0.5s ease;
       z-index: 2;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
 
     #wind {
@@ -77,20 +101,19 @@
       color: white;
       border: none;
       cursor: pointer;
-      z-index: 10;
+      z-index: 21;
+      text-shadow: 0 0 10px white;
     }
 
-    #scores {
+    #countdown {
       position: absolute;
-      top: 20px;
+      top: 60%;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 24px;
-      z-index: 10;
-      background: rgba(0,0,0,0.7);
-      padding: 10px 20px;
-      border-radius: 10px;
-      line-height: 1.6;
+      font-size: 64px;
+      color: white;
+      z-index: 22;
+      display: none;
     }
 
     #gameOver {
@@ -121,8 +144,11 @@
   </style>
 </head>
 <body>
-  <button id="startButton">START</button>
+  <div id="title">Leitz Balance Board</div>
   <div id="scores"></div>
+
+  <button id="startButton">START</button>
+  <div id="countdown"></div>
 
   <div id="gameArea">
     <div class="ring" style="width: 900px; height: 900px;"></div>
@@ -143,11 +169,13 @@
     const gameOver = document.getElementById('gameOver');
     const gameOverText = document.getElementById('gameOverText');
     const startButton = document.getElementById('startButton');
+    const countdownEl = document.getElementById('countdown');
     const restartButton = document.getElementById('restartButton');
     const scoresEl = document.getElementById('scores');
+    const gameArea = document.getElementById('gameArea');
 
-    let x = window.innerWidth / 2;
-    let y = window.innerHeight / 2;
+    let x = 450;
+    let y = 450;
     let speed = 0.5;
     let active = false;
     let startTime = 0;
@@ -163,24 +191,45 @@
     });
 
     function startGame() {
+      countdownEl.innerText = '';
+      countdownEl.style.display = 'block';
       startButton.style.display = 'none';
-      x = window.innerWidth / 2;
-      y = window.innerHeight / 2;
-      updateBallPosition();
-      active = true;
-      startTime = Date.now();
-      requestAnimationFrame(gameLoop);
+
+      // Ball initial groß & zentriert
+      ball.style.width = '70vw';
+      ball.style.height = '70vw';
+      ball.style.left = '50%';
+      ball.style.top = '50%';
+      ball.style.transform = 'translate(-50%, -50%)';
+
+      let count = 3;
+      const countdown = setInterval(() => {
+        countdownEl.innerText = count;
+        count--;
+        if (count < 0) {
+          clearInterval(countdown);
+          countdownEl.style.display = 'none';
+          scoresEl.style.display = 'block';
+
+          // Ball klein und zentriert
+          ball.style.width = '100px';
+          ball.style.height = '100px';
+          x = 450;
+          y = 450;
+          ball.style.left = `${x - 50}px`;
+          ball.style.top = `${y - 50}px`;
+
+          active = true;
+          startTime = Date.now();
+          requestAnimationFrame(gameLoop);
+        }
+      }, 1000);
     }
 
     function updateScores() {
       const topScores = scores.sort((a,b) => b-a).slice(0, 5);
       scoresEl.innerHTML = 'Bestenliste:<br>' +
         topScores.map((s, i) => `${i + 1}. ${s.toFixed(1)}s`).join('<br>');
-    }
-
-    function updateBallPosition() {
-      ball.style.left = `${x - ball.offsetWidth / 2}px`;
-      ball.style.top = `${y - ball.offsetHeight / 2}px`;
     }
 
     function updateBall() {
@@ -191,13 +240,11 @@
       x += tiltX * speed + windForce.x;
       y += tiltY * speed + windForce.y;
 
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      const dx = x - cx;
-      const dy = y - cy;
+      const dx = x - 450;
+      const dy = y - 450;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance > 750) { // Begrenzung am äußersten Ring (1500px Durchmesser)
+      if (distance > 450) {
         active = false;
         const finalTime = ((Date.now() - startTime)/1000).toFixed(1);
         gameOverText.innerText = `Game Over! Zeit: ${finalTime}s`;
@@ -207,7 +254,8 @@
         return;
       }
 
-      updateBallPosition();
+      ball.style.left = `${x - 50}px`;
+      ball.style.top = `${y - 50}px`;
     }
 
     function gameLoop() {
@@ -223,7 +271,7 @@
       windActive = true;
 
       const angle = Math.random() * 2 * Math.PI;
-      const baseStrength = 0.8 + (gameDuration / 30); 
+      const baseStrength = 0.8 + (gameDuration / 30);
       const strength = baseStrength + Math.random() * baseStrength + speed / 3;
       windForce.x = Math.cos(angle) * strength;
       windForce.y = Math.sin(angle) * strength;
@@ -243,10 +291,11 @@
 
     restartButton.onclick = () => {
       gameOver.style.display = 'none';
-      x = window.innerWidth / 2;
-      y = window.innerHeight / 2;
+      x = 450;
+      y = 450;
       speed = 0.5;
-      updateBallPosition();
+      ball.style.left = `${x - 50}px`;
+      ball.style.top = `${y - 50}px`;
       active = true;
       startTime = Date.now();
       requestAnimationFrame(gameLoop);
