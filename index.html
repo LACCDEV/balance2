@@ -48,7 +48,7 @@
       z-index: 2;
       left: 50%;
       top: 50%;
-      transform: translate(-50%, -50%) scale(2); /* Anfangs größer */
+      transform: translate(-50%, -50%) scale(2);
     }
 
     #wind {
@@ -123,7 +123,6 @@
       margin-top: 20px;
     }
 
-    /* Countdown Anzeige */
     #countdown {
       position: absolute;
       top: 50%;
@@ -136,7 +135,6 @@
       text-shadow: 0 0 20px rgba(255,255,255,0.8);
     }
 
-    /* Berechtigungs-Popup */
     #permissionPopup {
       position: fixed;
       top: 0;
@@ -164,7 +162,6 @@
   </style>
 </head>
 <body>
-  <!-- Berechtigungs-Popup -->
   <div id="permissionPopup">
     <h2>Sensorzugriff benötigt</h2>
     <p>Bitte erlauben Sie den Zugriff auf die Sensordaten.</p>
@@ -240,7 +237,7 @@
 
     function startCountdown() {
       startButton.style.display = 'none';
-      ball.style.transform = 'translate(-50%, -50%) scale(1)'; // Ball auf normale Größe
+      ball.style.transform = 'translate(-50%, -50%) scale(1)';
       
       let count = 3;
       countdownEl.textContent = count;
@@ -253,15 +250,16 @@
         if (count <= 0) {
           clearInterval(countdownInterval);
           countdownEl.style.display = 'none';
+          // Position explizit zurücksetzen vor Spielstart
+          x = window.innerWidth / 2;
+          y = window.innerHeight / 2;
+          updateBallPosition();
           startGame();
         }
       }, 1000);
     }
 
     function startGame() {
-      x = window.innerWidth / 2;
-      y = window.innerHeight / 2;
-      updateBallPosition();
       active = true;
       startTime = Date.now();
       requestAnimationFrame(gameLoop);
@@ -335,15 +333,16 @@
     }
 
     permissionButton.onclick = requestPermission;
-    startButton.onclick = startCountdown; // Geändert zu startCountdown
+    startButton.onclick = startCountdown;
 
     restartButton.onclick = () => {
       gameOver.style.display = 'none';
       x = window.innerWidth / 2;
       y = window.innerHeight / 2;
       speed = 0.5;
-      ball.style.transform = 'translate(-50%, -50%) scale(2)'; // Ball wieder groß
-      startButton.style.display = 'block'; // Start-Button wieder anzeigen
+      ball.style.transform = 'translate(-50%, -50%) scale(2)';
+      startButton.style.display = 'block';
+      updateBallPosition();
     };
 
     setInterval(() => {
