@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Leitz Balance Board</title>
   <style>
     html, body {
@@ -11,17 +11,14 @@
       overflow: hidden;
       background: black;
       color: white;
-      font-family: -apple-system, sans-serif;
+      font-family: sans-serif;
       text-align: center;
-      touch-action: none;
-      height: 100%;
-      width: 100%;
     }
 
     #gameArea {
       position: absolute;
-      width: 100vmin;
-      height: 100vmin;
+      width: 1600px;
+      height: 1600px;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -31,7 +28,7 @@
 
     .ring {
       position: absolute;
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      border: 3px solid rgba(255, 255, 255, 0.3);
       border-radius: 50%;
       pointer-events: none;
       top: 50%;
@@ -41,22 +38,24 @@
 
     #ball {
       position: absolute;
-      width: 20vmin;
-      height: 20vmin;
+      width: 70vw;
+      height: 70vw;
+      max-width: 300px;
+      max-height: 300px;
       background: limegreen;
       border-radius: 50%;
-      box-shadow: 0 0 10px limegreen;
+      box-shadow: 0 0 40px limegreen;
       transition: transform 0.1s linear;
       z-index: 2;
     }
 
     #wind {
       position: absolute;
-      width: 15vmin;
-      height: 15vmin;
+      width: 150px;
+      height: 150px;
       background: rgba(0,255,255,0.2);
       border-radius: 50%;
-      border: 2px solid cyan;
+      border: 3px solid cyan;
       pointer-events: none;
       transition: transform 0.3s ease;
       animation: pulse 1s infinite;
@@ -74,24 +73,25 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 6vmin;
+      font-size: 48px;
       background: none;
       color: white;
       border: none;
       cursor: pointer;
       z-index: 10;
+      display: none; /* Anfangs versteckt */
     }
 
     #scores {
       position: absolute;
-      top: 2vmin;
+      top: 20px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 3vmin;
+      font-size: 24px;
       z-index: 10;
       background: rgba(0,0,0,0.7);
-      padding: 1vmin 3vmin;
-      border-radius: 2vmin;
+      padding: 10px 20px;
+      border-radius: 10px;
       line-height: 1.6;
     }
 
@@ -100,73 +100,82 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 4vmin;
+      font-size: 32px;
       display: none;
       flex-direction: column;
       align-items: center;
       z-index: 30;
       background: rgba(0,0,0,0.8);
-      padding: 4vmin;
-      border-radius: 3vmin;
+      padding: 30px;
+      border-radius: 15px;
     }
 
     #restartButton {
-      font-size: 3vmin;
-      padding: 1.5vmin 4vmin;
+      font-size: 24px;
+      padding: 10px 30px;
       background: limegreen;
       color: black;
       border: none;
-      border-radius: 1.5vmin;
+      border-radius: 8px;
       cursor: pointer;
-      margin-top: 3vmin;
+      margin-top: 20px;
     }
     
-    #permissionPrompt {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+    /* Stile für das Berechtigungs-Popup */
+    #permissionPopup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: rgba(0,0,0,0.9);
-      padding: 4vmin;
-      border-radius: 3vmin;
-      width: 80vmin;
-      max-width: 90%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       z-index: 100;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    
+    #permissionPopup h2 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+    
+    #permissionPopup p {
+      font-size: 24px;
+      margin-bottom: 40px;
+      max-width: 80%;
       text-align: center;
-      font-size: 3.5vmin;
     }
     
     #permissionButton {
-      font-size: 3.5vmin;
-      padding: 1.5vmin 4vmin;
+      font-size: 24px;
+      padding: 15px 30px;
       background: limegreen;
       color: black;
       border: none;
-      border-radius: 1.5vmin;
+      border-radius: 8px;
       cursor: pointer;
-      margin-top: 3vmin;
-    }
-    
-    h2 {
-      font-size: 4.5vmin;
-      margin-bottom: 2vmin;
     }
   </style>
 </head>
 <body>
-  <div id="permissionPrompt">
+  <!-- Berechtigungs-Popup -->
+  <div id="permissionPopup">
     <h2>Sensorberechtigung benötigt</h2>
-    <p>Dieses Spiel verwendet die Sensoren Ihres Geräts für die Steuerung. Bitte erlauben Sie den Zugriff auf die Sensordaten.</p>
+    <p>Dieses Spiel benötigt Zugriff auf die Sensordaten Ihres Geräts, um zu funktionieren.</p>
     <button id="permissionButton">Zugriff erlauben</button>
   </div>
   
-  <button id="startButton" style="display:none;">START</button>
+  <button id="startButton">START</button>
   <div id="scores"></div>
 
   <div id="gameArea">
-    <div class="ring" style="width: 60vmin; height: 60vmin;"></div>
-    <div class="ring" style="width: 80vmin; height: 80vmin;"></div>
-    <div class="ring" style="width: 100vmin; height: 100vmin;"></div>
+    <div class="ring" style="width: 900px; height: 900px;"></div>
+    <div class="ring" style="width: 1200px; height: 1200px;"></div>
+    <div class="ring" style="width: 1500px; height: 1500px;"></div>
 
     <div id="ball"></div>
     <div id="wind"></div>
@@ -184,7 +193,7 @@
     const startButton = document.getElementById('startButton');
     const restartButton = document.getElementById('restartButton');
     const scoresEl = document.getElementById('scores');
-    const permissionPrompt = document.getElementById('permissionPrompt');
+    const permissionPopup = document.getElementById('permissionPopup');
     const permissionButton = document.getElementById('permissionButton');
 
     let x = window.innerWidth / 2;
@@ -199,30 +208,35 @@
 
     let tiltX = 0, tiltY = 0;
     
-    function handleOrientation(e) {
-      tiltX = (e.gamma || 0) * 0.7; // Sensitivität reduzieren
-      tiltY = (e.beta || 0) * 0.7;
-    }
-
+    // Funktion zur Anforderung der Berechtigung
     function requestPermission() {
       if (typeof DeviceOrientationEvent !== 'undefined' && 
           typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // Für iOS 13+ Geräte
         DeviceOrientationEvent.requestPermission()
           .then(response => {
             if (response === 'granted') {
-              permissionPrompt.style.display = 'none';
+              // Berechtigung erteilt
+              permissionPopup.style.display = 'none';
               startButton.style.display = 'block';
               window.addEventListener('deviceorientation', handleOrientation);
             } else {
-              alert('Das Spiel benötigt Zugriff auf die Sensordaten, um zu funktionieren.');
+              // Berechtigung verweigert
+              alert('Das Spiel kann ohne Sensorzugriff nicht gespielt werden.');
             }
           })
           .catch(console.error);
       } else {
-        permissionPrompt.style.display = 'none';
+        // Für andere Browser/ältere Geräte
+        permissionPopup.style.display = 'none';
         startButton.style.display = 'block';
         window.addEventListener('deviceorientation', handleOrientation);
       }
+    }
+    
+    function handleOrientation(e) {
+      tiltX = e.gamma || 0;
+      tiltY = e.beta || 0;
     }
 
     function startGame() {
@@ -260,7 +274,7 @@
       const dy = y - cy;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance > (Math.min(window.innerWidth, window.innerHeight) * 0.4)) {
+      if (distance > 750) { // Begrenzung am äußersten Ring (1500px Durchmesser)
         active = false;
         const finalTime = ((Date.now() - startTime)/1000).toFixed(1);
         gameOverText.innerText = `Game Over! Zeit: ${finalTime}s`;
@@ -291,8 +305,8 @@
       windForce.x = Math.cos(angle) * strength;
       windForce.y = Math.sin(angle) * strength;
 
-      wind.style.left = `${x - wind.offsetWidth / 2}px`;
-      wind.style.top = `${y - wind.offsetHeight / 2}px`;
+      wind.style.left = `${x - 75}px`;
+      wind.style.top = `${y - 75}px`;
       wind.style.display = 'block';
 
       setTimeout(() => {
@@ -302,10 +316,14 @@
       }, 2000);
     }
 
-    permissionButton.onclick = requestPermission;
-    startButton.onclick = startGame;
-
-    restartButton.onclick = () => {
+    // Event Listener für den Berechtigungs-Button
+    permissionButton.addEventListener('click', requestPermission);
+    
+    // Start-Button Event Listener
+    startButton.addEventListener('click', startGame);
+    
+    // Restart-Button Event Listener
+    restartButton.addEventListener('click', () => {
       gameOver.style.display = 'none';
       x = window.innerWidth / 2;
       y = window.innerHeight / 2;
@@ -314,15 +332,14 @@
       active = true;
       startTime = Date.now();
       requestAnimationFrame(gameLoop);
-    };
+    });
 
     setInterval(() => {
       if (active && !windActive) activateWind();
     }, 3000);
     
-    // Initialen Zustand setzen
+    // Initial den Start-Button verstecken
     startButton.style.display = 'none';
-    permissionPrompt.style.display = 'block';
   </script>
 </body>
 </html>
