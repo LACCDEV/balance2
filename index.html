@@ -95,18 +95,20 @@
       display: none;
     }
 
-    #scores {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 24px;
-      z-index: 10;
-      background: rgba(0,0,0,0.7);
-      padding: 10px 20px;
-      border-radius: 10px;
-      line-height: 1.6;
-    }
+#scores {
+  position: absolute;
+  top: 60px; /* Abstand vom oberen Rand */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  z-index: 10;
+  background: rgba(0,0,0,0.7);
+  padding: 10px 20px;
+  border-radius: 10px;
+  line-height: 1.6;
+  max-width: 90%; /* Damit es nicht zu breit wird */
+  overflow: hidden;
+}
 
     #gameOver {
       position: absolute;
