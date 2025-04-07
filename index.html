@@ -2,7 +2,6 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Leitz Balance Board</title>
   <style>
     html, body {
@@ -79,7 +78,7 @@
       border: none;
       cursor: pointer;
       z-index: 10;
-      display: none; /* Anfangs versteckt */
+      display: none;
     }
 
     #scores {
@@ -120,8 +119,8 @@
       cursor: pointer;
       margin-top: 20px;
     }
-    
-    /* Stile für das Berechtigungs-Popup */
+
+    /* Berechtigungs-Popup mit minimalen Änderungen */
     #permissionPopup {
       position: fixed;
       top: 0;
@@ -134,39 +133,26 @@
       justify-content: center;
       align-items: center;
       z-index: 100;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    
-    #permissionPopup h2 {
-      font-size: 32px;
-      margin-bottom: 20px;
-    }
-    
-    #permissionPopup p {
-      font-size: 24px;
-      margin-bottom: 40px;
-      max-width: 80%;
-      text-align: center;
     }
     
     #permissionButton {
       font-size: 24px;
-      padding: 15px 30px;
+      padding: 10px 30px;
       background: limegreen;
       color: black;
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <!-- Berechtigungs-Popup -->
+  <!-- Minimales Berechtigungs-Popup -->
   <div id="permissionPopup">
-    <h2>Sensorberechtigung benötigt</h2>
-    <p>Dieses Spiel benötigt Zugriff auf die Sensordaten Ihres Geräts, um zu funktionieren.</p>
-    <button id="permissionButton">Zugriff erlauben</button>
+    <h2>Sensorzugriff benötigt</h2>
+    <p>Bitte erlauben Sie den Zugriff auf die Sensordaten.</p>
+    <button id="permissionButton">Erlauben</button>
   </div>
   
   <button id="startButton">START</button>
@@ -208,35 +194,30 @@
 
     let tiltX = 0, tiltY = 0;
     
-    // Funktion zur Anforderung der Berechtigung
+    function handleOrientation(e) {
+      tiltX = e.gamma || 0;
+      tiltY = e.beta || 0;
+    }
+
     function requestPermission() {
       if (typeof DeviceOrientationEvent !== 'undefined' && 
           typeof DeviceOrientationEvent.requestPermission === 'function') {
-        // Für iOS 13+ Geräte
         DeviceOrientationEvent.requestPermission()
           .then(response => {
             if (response === 'granted') {
-              // Berechtigung erteilt
               permissionPopup.style.display = 'none';
               startButton.style.display = 'block';
               window.addEventListener('deviceorientation', handleOrientation);
             } else {
-              // Berechtigung verweigert
-              alert('Das Spiel kann ohne Sensorzugriff nicht gespielt werden.');
+              alert('Das Spiel benötigt Sensorzugriff');
             }
           })
           .catch(console.error);
       } else {
-        // Für andere Browser/ältere Geräte
         permissionPopup.style.display = 'none';
         startButton.style.display = 'block';
         window.addEventListener('deviceorientation', handleOrientation);
       }
-    }
-    
-    function handleOrientation(e) {
-      tiltX = e.gamma || 0;
-      tiltY = e.beta || 0;
     }
 
     function startGame() {
@@ -274,7 +255,7 @@
       const dy = y - cy;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance > 750) { // Begrenzung am äußersten Ring (1500px Durchmesser)
+      if (distance > 750) {
         active = false;
         const finalTime = ((Date.now() - startTime)/1000).toFixed(1);
         gameOverText.innerText = `Game Over! Zeit: ${finalTime}s`;
@@ -316,14 +297,10 @@
       }, 2000);
     }
 
-    // Event Listener für den Berechtigungs-Button
-    permissionButton.addEventListener('click', requestPermission);
-    
-    // Start-Button Event Listener
-    startButton.addEventListener('click', startGame);
-    
-    // Restart-Button Event Listener
-    restartButton.addEventListener('click', () => {
+    permissionButton.onclick = requestPermission;
+    startButton.onclick = startGame;
+
+    restartButton.onclick = () => {
       gameOver.style.display = 'none';
       x = window.innerWidth / 2;
       y = window.innerHeight / 2;
@@ -332,14 +309,11 @@
       active = true;
       startTime = Date.now();
       requestAnimationFrame(gameLoop);
-    });
+    };
 
     setInterval(() => {
       if (active && !windActive) activateWind();
     }, 3000);
-    
-    // Initial den Start-Button verstecken
-    startButton.style.display = 'none';
   </script>
 </body>
 </html>
