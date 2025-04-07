@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Leitz Balance Board</title>
   <style>
     html, body {
@@ -12,36 +13,36 @@
       color: white;
       font-family: sans-serif;
       text-align: center;
-    }
-
-    #title {
-      position: absolute;
-      top: 20px;
-      width: 100%;
-      font-size: 24px;
-      font-weight: bold;
-      z-index: 10;
+      touch-action: none;
     }
 
     #gameArea {
       position: absolute;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 1600px;
+      height: 1600px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       overflow: hidden;
+      border-radius: 50%;
     }
 
     .ring {
       position: absolute;
-      border: 2px solid rgba(255, 255, 255, 0.1);
+      border: 3px solid rgba(255, 255, 255, 0.3);
       border-radius: 50%;
       pointer-events: none;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
 
     #ball {
       position: absolute;
-      width: 80px;
-      height: 80px;
+      width: 70vw;
+      height: 70vw;
+      max-width: 300px;
+      max-height: 300px;
       background: limegreen;
       border-radius: 50%;
       box-shadow: 0 0 40px limegreen;
@@ -51,11 +52,11 @@
 
     #wind {
       position: absolute;
-      width: 120px;
-      height: 120px;
-      background: rgba(0,255,255,0.1);
+      width: 150px;
+      height: 150px;
+      background: rgba(0,255,255,0.2);
       border-radius: 50%;
-      border: 2px solid cyan;
+      border: 3px solid cyan;
       pointer-events: none;
       transition: transform 0.3s ease;
       animation: pulse 1s infinite;
@@ -68,32 +69,30 @@
       100% { transform: scale(1.5); opacity: 0; }
     }
 
-    #startScreen {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: black;
-      z-index: 20;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
     #startButton {
-      font-size: 24px;
-      padding: 10px 30px;
-      background: limegreen;
-      color: black;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
+      background: none;
+      color: white;
       border: none;
-      border-radius: 12px;
       cursor: pointer;
+      z-index: 10;
     }
 
-    #countdown {
-      font-size: 48px;
-      margin-top: 20px;
+    #scores {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      z-index: 10;
+      background: rgba(0,0,0,0.7);
+      padding: 10px 20px;
+      border-radius: 10px;
+      line-height: 1.6;
     }
 
     #gameOver {
@@ -103,32 +102,83 @@
       transform: translate(-50%, -50%);
       font-size: 32px;
       display: none;
-      z-index: 10;
+      flex-direction: column;
+      align-items: center;
+      z-index: 30;
+      background: rgba(0,0,0,0.8);
+      padding: 30px;
+      border-radius: 15px;
+    }
+
+    #restartButton {
+      font-size: 24px;
+      padding: 10px 30px;
+      background: limegreen;
+      color: black;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    
+    #permissionPrompt {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.9);
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 80%;
+      z-index: 100;
+      text-align: center;
+    }
+    
+    #permissionButton {
+      font-size: 24px;
+      padding: 10px 30px;
+      background: limegreen;
+      color: black;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <div id="title">Leitz Balance Board</div>
-  <div id="startScreen">
-    <button id="startButton">Start</button>
-    <div id="countdown"></div>
+  <div id="permissionPrompt">
+    <h2>Sensorberechtigung benötigt</h2>
+    <p>Dieses Spiel verwendet die Sensoren Ihres Geräts für die Steuerung. Bitte erlauben Sie den Zugriff auf die Sensordaten.</p>
+    <button id="permissionButton">Zugriff erlauben</button>
   </div>
+  
+  <button id="startButton" style="display:none;">START</button>
+  <div id="scores"></div>
+
   <div id="gameArea">
-    <div class="ring" style="width: 300px; height: 300px; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
-    <div class="ring" style="width: 500px; height: 500px; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
-    <div class="ring" style="width: 700px; height: 700px; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+    <div class="ring" style="width: 900px; height: 900px;"></div>
+    <div class="ring" style="width: 1200px; height: 1200px;"></div>
+    <div class="ring" style="width: 1500px; height: 1500px;"></div>
+
     <div id="ball"></div>
     <div id="wind"></div>
-    <div id="gameOver"></div>
+    <div id="gameOver">
+      <div id="gameOverText"></div>
+      <button id="restartButton">Nochmal spielen</button>
+    </div>
   </div>
 
   <script>
     const ball = document.getElementById('ball');
     const wind = document.getElementById('wind');
     const gameOver = document.getElementById('gameOver');
-    const startScreen = document.getElementById('startScreen');
+    const gameOverText = document.getElementById('gameOverText');
     const startButton = document.getElementById('startButton');
-    const countdownEl = document.getElementById('countdown');
+    const restartButton = document.getElementById('restartButton');
+    const scoresEl = document.getElementById('scores');
+    const permissionPrompt = document.getElementById('permissionPrompt');
+    const permissionButton = document.getElementById('permissionButton');
 
     let x = window.innerWidth / 2;
     let y = window.innerHeight / 2;
@@ -137,38 +187,64 @@
     let startTime = 0;
     let windForce = {x: 0, y: 0};
     let windActive = false;
-    let gameStarted = false;
+    let gameDuration = 0;
+    let scores = [];
 
     let tiltX = 0, tiltY = 0;
-    window.addEventListener('deviceorientation', (e) => {
+    
+    function handleOrientation(e) {
       tiltX = e.gamma || 0;
       tiltY = e.beta || 0;
-    });
+    }
 
-    startButton.onclick = () => {
-      countdownEl.innerText = '';
+    function requestPermission() {
+      // Auf iOS 13+ müssen wir DeviceOrientationEvent.requestPermission anfragen
+      if (typeof DeviceOrientationEvent !== 'undefined' && 
+          typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+          .then(response => {
+            if (response === 'granted') {
+              permissionPrompt.style.display = 'none';
+              startButton.style.display = 'block';
+              window.addEventListener('deviceorientation', handleOrientation);
+            } else {
+              alert('Das Spiel benötigt Zugriff auf die Sensordaten, um zu funktionieren.');
+            }
+          })
+          .catch(console.error);
+      } else {
+        // Für ältere Browser oder andere Geräte
+        permissionPrompt.style.display = 'none';
+        startButton.style.display = 'block';
+        window.addEventListener('deviceorientation', handleOrientation);
+      }
+    }
+
+    function startGame() {
       startButton.style.display = 'none';
-      let count = 3;
-      ball.style.width = '40px';
-      ball.style.height = '40px';
-      ball.style.left = `${x - 20}px`;
-      ball.style.top = `${y - 20}px`;
-      const countdown = setInterval(() => {
-        countdownEl.innerText = count;
-        count--;
-        if (count < 0) {
-          clearInterval(countdown);
-          startScreen.style.display = 'none';
-          active = true;
-          gameStarted = true;
-          startTime = Date.now();
-          requestAnimationFrame(gameLoop);
-        }
-      }, 1000);
-    };
+      x = window.innerWidth / 2;
+      y = window.innerHeight / 2;
+      updateBallPosition();
+      active = true;
+      startTime = Date.now();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function updateScores() {
+      const topScores = scores.sort((a,b) => b-a).slice(0, 5);
+      scoresEl.innerHTML = 'Bestenliste:<br>' +
+        topScores.map((s, i) => `${i + 1}. ${s.toFixed(1)}s`).join('<br>');
+    }
+
+    function updateBallPosition() {
+      ball.style.left = `${x - ball.offsetWidth / 2}px`;
+      ball.style.top = `${y - ball.offsetHeight / 2}px`;
+    }
 
     function updateBall() {
       if (!active) return;
+
+      gameDuration = (Date.now() - startTime) / 1000;
 
       x += tiltX * speed + windForce.x;
       y += tiltY * speed + windForce.y;
@@ -179,15 +255,17 @@
       const dy = y - cy;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance > 350) {
+      if (distance > 750) { // Begrenzung am äußersten Ring (1500px Durchmesser)
         active = false;
-        gameOver.innerText = `Game Over! Zeit: ${((Date.now() - startTime)/1000).toFixed(1)}s`;
-        gameOver.style.display = 'block';
+        const finalTime = ((Date.now() - startTime)/1000).toFixed(1);
+        gameOverText.innerText = `Game Over! Zeit: ${finalTime}s`;
+        gameOver.style.display = 'flex';
+        scores.push(parseFloat(finalTime));
+        updateScores();
         return;
       }
 
-      ball.style.left = `${x - 20}px`;
-      ball.style.top = `${y - 20}px`;
+      updateBallPosition();
     }
 
     function gameLoop() {
@@ -203,12 +281,13 @@
       windActive = true;
 
       const angle = Math.random() * 2 * Math.PI;
-      const strength = 0.6 + Math.random() * 0.6 + speed / 5;
+      const baseStrength = 0.8 + (gameDuration / 30); 
+      const strength = baseStrength + Math.random() * baseStrength + speed / 3;
       windForce.x = Math.cos(angle) * strength;
       windForce.y = Math.sin(angle) * strength;
 
-      wind.style.left = `${x - 60}px`;
-      wind.style.top = `${y - 60}px`;
+      wind.style.left = `${x - 75}px`;
+      wind.style.top = `${y - 75}px`;
       wind.style.display = 'block';
 
       setTimeout(() => {
@@ -218,9 +297,27 @@
       }, 2000);
     }
 
+    permissionButton.onclick = requestPermission;
+    startButton.onclick = startGame;
+
+    restartButton.onclick = () => {
+      gameOver.style.display = 'none';
+      x = window.innerWidth / 2;
+      y = window.innerHeight / 2;
+      speed = 0.5;
+      updateBallPosition();
+      active = true;
+      startTime = Date.now();
+      requestAnimationFrame(gameLoop);
+    };
+
     setInterval(() => {
       if (active && !windActive) activateWind();
-    }, 5000);
+    }, 3000);
+    
+    // Initialen Zustand setzen
+    startButton.style.display = 'none';
+    permissionPrompt.style.display = 'block';
   </script>
 </body>
 </html>
