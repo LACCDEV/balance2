@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Leitz Balance Board</title>
+
+      <div id="sensitivityControl">
+  <label for="sensitivitySlider">Sensitivität:</label>
+  <input type="range" id="sensitivitySlider" min="0.1" max="2" value="0.5" step="0.1">
+</div>
   <style>
     html, body {
       margin: 0;
@@ -25,6 +30,7 @@
       z-index: 10;
     }
 
+  
     #gameArea {
       position: absolute;
       width: 1600px;
@@ -179,6 +185,19 @@
   font-size: 40px;
 }
 
+    #sensitivityControl {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 18px;
+}
+
+
   </style>
 </head>
 <body>
@@ -258,25 +277,26 @@
       }
     }
 
-    function startCountdown() {
-      startButton.style.display = 'none';
-      ball.style.transform = 'translate(-50%, -50%) scale(1)'; // Ball auf normale Größe
-      
-      let count = 3;
-      countdownEl.textContent = count;
-      countdownEl.style.display = 'block';
-      
-      const countdownInterval = setInterval(() => {
-        count--;
-        countdownEl.textContent = count;
-        
-        if (count <= 0) {
-          clearInterval(countdownInterval);
-          countdownEl.style.display = 'none';
-          startGame();
-        }
-      }, 1000);
+function startCountdown() {
+  startButton.style.display = 'none';
+  ball.style.transform = 'translate(-50%, -50%) scale(1)';
+
+  let count = 5;
+  countdownEl.textContent = count;
+  countdownEl.style.display = 'block';
+
+  const countdownInterval = setInterval(() => {
+    count--;
+    countdownEl.textContent = count;
+
+    if (count <= 0) {
+      clearInterval(countdownInterval);
+      countdownEl.style.display = 'none';
+      startGame();
     }
+  }, 1000);
+}
+
 
     function startGame() {
       x = window.innerWidth / 2;
@@ -369,6 +389,12 @@
     setInterval(() => {
       if (active && !windActive) activateWind();
     }, 3000);
+
+    const sensitivitySlider = document.getElementById('sensitivitySlider');
+sensitivitySlider.oninput = () => {
+  speed = parseFloat(sensitivitySlider.value);
+};
+
   </script>
 </body>
 </html>
