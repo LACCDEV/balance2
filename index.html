@@ -330,14 +330,19 @@ function startCountdown() {
 }
 
 
-    function startGame() {
-      x = window.innerWidth / 2;
-      y = window.innerHeight / 2;
-      updateBallPosition();
-      active = true;
-      startTime = Date.now();
-      requestAnimationFrame(gameLoop);
-    }
+function startGame() {
+  // Setze die Ballposition auf den Mittelpunkt der gameArea
+  x = 800;  // Mittelpunkt der gameArea (horizontal)
+  y = 800;  // Mittelpunkt der gameArea (vertikal)
+  
+  // Ball visuell in die Mitte setzen
+  updateBallPosition();
+
+  active = true;
+  startTime = Date.now();
+  requestAnimationFrame(gameLoop);
+}
+
 
     function updateScores() {
       const topScores = scores.sort((a,b) => b-a).slice(0, 5);
