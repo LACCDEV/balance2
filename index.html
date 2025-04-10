@@ -2,65 +2,55 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Leitz Balance Board</title>
   <style>
     body {
       margin: 0;
-      background: #111;
       overflow: hidden;
+      font-family: Arial, sans-serif;
+      background-color: #111;
       color: white;
-      font-family: sans-serif;
     }
     #ball {
       position: absolute;
-      width: 100px;
-      height: 100px;
-      background: limegreen;
+      width: 80px;
+      height: 80px;
+      background-color: limegreen;
       border-radius: 50%;
       transform: translate(-50%, -50%);
     }
-    #startScreen, #gameOver {
+    #startScreen, #gameOverScreen {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.9);
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.9);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
       z-index: 10;
     }
-    #startButton {
+    #startButton, #restartButton {
       padding: 1em 2em;
       font-size: 1.5em;
-      background: limegreen;
+      background-color: limegreen;
       border: none;
-      border-radius: 0.5em;
+      border-radius: 8px;
       cursor: pointer;
     }
     #countdown {
       font-size: 4em;
-      margin-bottom: 1em;
-    }
-    #scores {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      font-size: 1.2em;
-    }
-    #windDisplay {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 1.2em;
+      margin-bottom: 20px;
     }
     #sliderContainer {
-      position: absolute;
+      position: fixed;
       bottom: 20px;
-      width: 100%;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
-      justify-content: center;
       align-items: center;
       gap: 10px;
       z-index: 20;
@@ -68,29 +58,29 @@
     #difficulty {
       width: 200px;
     }
-    #difficultyValue {
-      font-size: 1.2em;
-      width: 30px;
-      text-align: center;
+    #windArrows div {
+      position: absolute;
+      width: 40px;
+      height: 4px;
+      background: white;
+      opacity: 0.8;
+      z-index: 5;
     }
   </style>
 </head>
 <body>
-  <div id="ball"></div>
-
   <div id="startScreen">
     <div id="countdown"></div>
     <button id="startButton">Start</button>
   </div>
 
-  <div id="gameOver">
-    <div id="gameOverText"></div>
-    <button onclick="location.reload()">Neu starten</button>
+  <div id="gameOverScreen" style="display:none;">
+    <h1 id="gameOverText"></h1>
+    <button id="restartButton" onclick="location.reload()">Neu starten</button>
   </div>
 
-  <div id="scores"></div>
-  <div id="windDisplay"></div>
-
+  <div id="ball"></div>
+  <div id="windArrows"></div>
   <div id="sliderContainer">
     <label for="difficulty">Schwierigkeit:</label>
     <input type="range" id="difficulty" min="1" max="5" value="3" />
@@ -98,35 +88,30 @@
   </div>
 
   <script>
-    const ball = document.getElementById('ball');
-    const startScreen = document.getElementById('startScreen');
-    const startButton = document.getElementById('startButton');
-    const countdown = document.getElementById('countdown');
-    const gameOver = document.getElementById('gameOver');
-    const gameOverText = document.getElementById('gameOverText');
-    const scoresDisplay = document.getElementById('scores');
-    const windDisplay = document.getElementById('windDisplay');
-    const difficultySlider = document.getElementById('difficulty');
-    const difficultyValue = document.getElementById('difficultyValue');
+    const ball = document.getElementById("ball");
+    const startScreen = document.getElementById("startScreen");
+    const countdown = document.getElementById("countdown");
+    const gameOverScreen = document.getElementById("gameOverScreen");
+    const gameOverText = document.getElementById("gameOverText");
+    const difficultySlider = document.getElementById("difficulty");
+    const difficultyValue = document.getElementById("difficultyValue");
+    const windArrows = document.getElementById("windArrows");
 
     let x = window.innerWidth / 2;
     let y = window.innerHeight / 2;
     let tiltX = 0;
     let tiltY = 0;
-    let speed = 2;
+    let active = false;
+    let startTime;
     let windX = 0;
     let windY = 0;
     let windBursts = [];
-    let active = false;
-    let startTime = 0;
-    let scores = [];
 
-    difficultySlider.addEventListener('input', () => {
+    difficultySlider.addEventListener("input", () => {
       difficultyValue.textContent = difficultySlider.value;
     });
 
-    startButton.addEventListener('click', () => {
-      startButton.style.display = 'none';
+    document.getElementById("startButton").addEventListener("click", () => {
       let counter = 5;
       countdown.textContent = counter;
       const interval = setInterval(() => {
@@ -134,130 +119,87 @@
         countdown.textContent = counter;
         if (counter === 0) {
           clearInterval(interval);
-          startScreen.style.display = 'none';
-          countdown.textContent = '';
+          startScreen.style.display = "none";
           startGame();
         }
       }, 1000);
     });
 
-    function updateBallPosition() {
-      ball.style.left = `${x}px`;
-      ball.style.top = `${y}px`;
-    }
-
-    function updateWindDisplay(strength) {
-      windDisplay.textContent = `Windstärke: ${strength.toFixed(2)}`;
-    }
-
-    function updateScores() {
-      scoresDisplay.innerHTML = `Zeiten: ${scores.map(s => s + "s").join(", ")}`;
-    }
-
-    function updateBall() {
-      if (!active) return;
-
-      const time = (Date.now() - startTime) / 1000;
-      const baseStrength = 0.3 + time / 30;
-      const windStrength = baseStrength * difficultySlider.value;
-
-      updateWindDisplay(windStrength);
-
-      let windEffectX = windX * windStrength;
-      let windEffectY = windY * windStrength;
-
-      // Windböen einbeziehen
-      windBursts.forEach(burst => {
-        windEffectX += burst.vx * burst.strength;
-        windEffectY += burst.vy * burst.strength;
-      });
-
-      x += tiltX * speed + windEffectX;
-      y += tiltY * speed + windEffectY;
-
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      const dx = x - cx;
-      const dy = y - cy;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (distance > 750) {
-        active = false;
-        const finalTime = ((Date.now() - startTime) / 1000).toFixed(1);
-        gameOverText.innerText = `Game Over! Zeit: ${finalTime}s`;
-        gameOver.style.display = 'flex';
-        scores.push(parseFloat(finalTime));
-        updateScores();
-        return;
-      }
-
-      updateBallPosition();
-      requestAnimationFrame(updateBall);
-    }
-
     function startGame() {
-      x = window.innerWidth / 2;
-      y = window.innerHeight / 2;
-      startTime = Date.now();
       active = true;
+      startTime = Date.now();
+      requestAnimationFrame(update);
 
-      // Windrichtung zufällig initialisieren
       setInterval(() => {
         const angle = Math.random() * 2 * Math.PI;
         windX = Math.cos(angle);
         windY = Math.sin(angle);
       }, 3000);
 
-      // Windböen zufällig
       setInterval(() => {
         if (active) spawnWindBurst();
-      }, 3000 + Math.random() * 2000);
-
-      updateBall();
+      }, 2000 + Math.random() * 2000);
     }
 
     function spawnWindBurst() {
       const angle = Math.random() * 2 * Math.PI;
       const strength = 1 + Math.random() * 2;
       const duration = 1500 + Math.random() * 1000;
-
       const vx = Math.cos(angle);
       const vy = Math.sin(angle);
 
-      const arrow = document.createElement('div');
-      arrow.style.position = 'absolute';
-      arrow.style.width = '40px';
-      arrow.style.height = '4px';
-      arrow.style.background = 'white';
+      const arrow = document.createElement("div");
       arrow.style.top = `${Math.random() * window.innerHeight}px`;
       arrow.style.left = `${Math.random() * window.innerWidth}px`;
       arrow.style.transform = `rotate(${angle * 180 / Math.PI}deg)`;
-      arrow.style.opacity = '0.8';
-      arrow.style.transition = `transform ${duration}ms linear`;
-      arrow.style.zIndex = '50';
-      document.body.appendChild(arrow);
+      windArrows.appendChild(arrow);
 
-      setTimeout(() => {
-        arrow.style.transform += ` translateX(${vx * 200}px) translateY(${vy * 200}px)`;
-        arrow.style.opacity = '0';
-      }, 10);
-
-      const burst = { vx, vy, strength, end: Date.now() + duration };
+      const burst = { vx, vy, strength, end: Date.now() + duration, arrow };
       windBursts.push(burst);
 
       setTimeout(() => {
         arrow.remove();
         windBursts = windBursts.filter(b => b !== burst);
-      }, duration + 200);
+      }, duration);
     }
 
-    window.addEventListener('deviceorientation', (e) => {
+    function update() {
+      if (!active) return;
+
+      const elapsed = (Date.now() - startTime) / 1000;
+      const windStrength = 0.2 + elapsed / 20 * parseInt(difficultySlider.value);
+
+      let totalWindX = windX * windStrength;
+      let totalWindY = windY * windStrength;
+
+      windBursts.forEach(burst => {
+        totalWindX += burst.vx * burst.strength;
+        totalWindY += burst.vy * burst.strength;
+      });
+
+      x += tiltX * 5 + totalWindX;
+      y += tiltY * 5 + totalWindY;
+
+      if (x < 0 || x > window.innerWidth || y < 0 || y > window.innerHeight) {
+        gameOver();
+        return;
+      }
+
+      ball.style.left = `${x}px`;
+      ball.style.top = `${y}px`;
+      requestAnimationFrame(update);
+    }
+
+    function gameOver() {
+      active = false;
+      gameOverText.textContent = `Game Over! Zeit: ${((Date.now() - startTime) / 1000).toFixed(1)}s`;
+      gameOverScreen.style.display = "flex";
+    }
+
+    window.addEventListener("deviceorientation", e => {
       tiltX = e.gamma / 45;
       tiltY = e.beta / 45;
     });
-
-    updateBallPosition();
-    gameOver.style.display = 'none';
   </script>
 </body>
 </html>
