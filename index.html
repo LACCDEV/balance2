@@ -331,16 +331,17 @@ function startCountdown() {
 
 
 function startGame() {
-  // Setze die Ballposition auf den Mittelpunkt der gameArea mit CSS
-  ball.style.top = '50%';
-  ball.style.left = '50%';
-  ball.style.transform = 'translate(-50%, -50%)';  // Zentriere den Ball
+  // Setze die Ballposition auf den Mittelpunkt der gameArea
+  x = 800;  // Mittelpunkt der gameArea (horizontal)
+  y = 800;  // Mittelpunkt der gameArea (vertikal)
   
+  // Ball visuell in die Mitte setzen
+  updateBallPosition();
+
   active = true;
   startTime = Date.now();
   requestAnimationFrame(gameLoop);
 }
-
 
 
     function updateScores() {
