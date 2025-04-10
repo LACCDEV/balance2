@@ -332,8 +332,8 @@ function startCountdown() {
 
 function startGame() {
   // Setze die Ballposition auf den Mittelpunkt der gameArea
-  x = 1000;  // Mittelpunkt der gameArea (horizontal)
-  y = 1000;  // Mittelpunkt der gameArea (vertikal)
+  x = 950;  // Mittelpunkt der gameArea (horizontal)
+  y = 950;  // Mittelpunkt der gameArea (vertikal)
   
   // Ball visuell in die Mitte setzen
   updateBallPosition();
@@ -368,13 +368,13 @@ function startGame() {
       x += tiltX * speed + windForce.x;
       y += tiltY * speed + windForce.y;
 
-      const cx = 1000;
-      const cy = 1000;
+      const cx = 950;
+      const cy = 950;
       const dx = x - cx;
       const dy = y - cy;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance > 500) {
+      if (distance > 450) {
         active = false;
         const finalTime = ((Date.now() - startTime)/1000).toFixed(1);
         gameOverText.innerText = `Game Over! Zeit: ${finalTime}s`;
