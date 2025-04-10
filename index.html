@@ -1,205 +1,400 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Leitz Balance Board</title>
+
+      <div id="sensitivityControl">
+  <label for="sensitivitySlider">Sensitivität:</label>
+  <input type="range" id="sensitivitySlider" min="0.1" max="2" value="0.5" step="0.1">
+</div>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
       overflow: hidden;
-      font-family: Arial, sans-serif;
-      background-color: #111;
+      background: black;
       color: white;
+      font-family: sans-serif;
+      text-align: center;
     }
-    #ball {
+
+    #leitz {
       position: absolute;
-      width: 80px;
-      height: 80px;
-      background-color: limegreen;
+      top: 10px; /* Positioniert das Wort "LEITZ" oben */
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 32px;
+      font-weight: bold;
+      color: white;
+      z-index: 10;
+    }
+
+  
+    #gameArea {
+      position: absolute;
+      width: 1600px;
+      height: 1600px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      overflow: hidden;
       border-radius: 50%;
+    }
+
+    .ring {
+      position: absolute;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      pointer-events: none;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
     }
-    #startScreen, #gameOverScreen {
+
+    #ball {
+      position: absolute;
+      width: 70vw;
+      height: 70vw;
+      max-width: 300px;
+      max-height: 300px;
+      background: limegreen;
+      border-radius: 50%;
+      box-shadow: 0 0 40px limegreen;
+      transition: transform 0.1s linear;
+      z-index: 2;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(2); /* Anfangs größer */
+    }
+
+    #wind {
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      background: rgba(0,255,255,0.2);
+      border-radius: 50%;
+      border: 3px solid cyan;
+      pointer-events: none;
+      transition: transform 0.3s ease;
+      animation: pulse 1s infinite;
+      display: none;
+      z-index: 1;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    #startButton {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
+      background: none;
+      color: white;
+      border: none;
+      cursor: pointer;
+      z-index: 10;
+      display: none;
+    }
+
+#scores {
+  position: absolute;
+  top: 80px; /* Abstand vom oberen Rand */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  z-index: 10;
+  background: rgba(0,0,0,0.7);
+  padding: 10px 20px;
+  border-radius: 10px;
+  line-height: 1.6;
+  max-width: 90%; /* Damit es nicht zu breit wird */
+  overflow: hidden;
+}
+
+    #gameOver {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 32px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      z-index: 30;
+      background: rgba(0,0,0,0.8);
+      padding: 30px;
+      border-radius: 15px;
+    }
+
+    #restartButton {
+      font-size: 60px;
+      padding: 10px 30px;
+      background: limegreen;
+      color: black;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    /* Countdown Anzeige */
+    #countdown {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 120px;
+      color: white;
+      z-index: 20;
+      display: none;
+      text-shadow: 0 0 20px rgba(255,255,255,0.8);
+    }
+
+    /* Berechtigungs-Popup */
+    #permissionPopup {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0, 0, 0, 0.9);
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      z-index: 10;
+      z-index: 100;
     }
-    #startButton, #restartButton {
-      padding: 1em 2em;
-      font-size: 1.5em;
-      background-color: limegreen;
+    
+    #permissionButton {
+      font-size: 60px;
+      padding: 10px 30px;
+      background: limegreen;
+      color: black;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
+      margin-top: 20px;
     }
-    #countdown {
-      font-size: 4em;
-      margin-bottom: 20px;
-    }
-    #sliderContainer {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 20;
-    }
-    #difficulty {
-      width: 200px;
-    }
-    #windArrows div {
-      position: absolute;
-      width: 40px;
-      height: 4px;
-      background: white;
-      opacity: 0.8;
-      z-index: 5;
-    }
+
+    #permissionPopup h2, #permissionPopup p {
+  font-size: 40px;
+}
+
+    #sensitivityControl {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 18px;
+}
+
+
   </style>
 </head>
 <body>
-  <div id="startScreen">
-    <div id="countdown"></div>
-    <button id="startButton">Start</button>
+  <!-- Berechtigungs-Popup -->
+  <div id="permissionPopup">
+    <h2>Sensorzugriff benötigt</h2>
+    <p>Bitte erlauben Sie den Zugriff<br>auf die Sensordaten.</p>
+    <button id="permissionButton">Erlauben</button>
   </div>
 
-  <div id="gameOverScreen" style="display:none;">
-    <h1 id="gameOverText"></h1>
-    <button id="restartButton" onclick="location.reload()">Neu starten</button>
-  </div>
+  <div id="leitz">LEITZ</div> <!-- "LEITZ" oben mittig hinzugefügt -->
+  
+  <button id="startButton">START</button>
+  <div id="scores"></div>
+  <div id="countdown"></div>
 
-  <div id="ball"></div>
-  <div id="windArrows"></div>
-  <div id="sliderContainer">
-    <label for="difficulty">Schwierigkeit:</label>
-    <input type="range" id="difficulty" min="1" max="5" value="3" />
-    <span id="difficultyValue">3</span>
+  <div id="gameArea">
+    <div class="ring" style="width: 900px; height: 900px;"></div>
+    <div class="ring" style="width: 1200px; height: 1200px;"></div>
+    <div class="ring" style="width: 1500px; height: 1500px;"></div>
+
+    <div id="ball"></div>
+    <div id="wind"></div>
+    <div id="gameOver">
+      <div id="gameOverText"></div>
+      <button id="restartButton">Nochmal spielen</button>
+    </div>
   </div>
 
   <script>
-    const ball = document.getElementById("ball");
-    const startScreen = document.getElementById("startScreen");
-    const countdown = document.getElementById("countdown");
-    const gameOverScreen = document.getElementById("gameOverScreen");
-    const gameOverText = document.getElementById("gameOverText");
-    const difficultySlider = document.getElementById("difficulty");
-    const difficultyValue = document.getElementById("difficultyValue");
-    const windArrows = document.getElementById("windArrows");
+    const ball = document.getElementById('ball');
+    const wind = document.getElementById('wind');
+    const gameOver = document.getElementById('gameOver');
+    const gameOverText = document.getElementById('gameOverText');
+    const startButton = document.getElementById('startButton');
+    const restartButton = document.getElementById('restartButton');
+    const scoresEl = document.getElementById('scores');
+    const permissionPopup = document.getElementById('permissionPopup');
+    const permissionButton = document.getElementById('permissionButton');
+    const countdownEl = document.getElementById('countdown');
 
     let x = window.innerWidth / 2;
     let y = window.innerHeight / 2;
-    let tiltX = 0;
-    let tiltY = 0;
+    let speed = 0.5;
     let active = false;
-    let startTime;
-    let windX = 0;
-    let windY = 0;
-    let windBursts = [];
+    let startTime = 0;
+    let windForce = {x: 0, y: 0};
+    let windActive = false;
+    let gameDuration = 0;
+    let scores = [];
 
-    difficultySlider.addEventListener("input", () => {
-      difficultyValue.textContent = difficultySlider.value;
-    });
+    let tiltX = 0, tiltY = 0;
 
-    document.getElementById("startButton").addEventListener("click", () => {
-      let counter = 5;
-      countdown.textContent = counter;
-      const interval = setInterval(() => {
-        counter--;
-        countdown.textContent = counter;
-        if (counter === 0) {
-          clearInterval(interval);
-          startScreen.style.display = "none";
-          startGame();
-        }
-      }, 1000);
-    });
+    function handleOrientation(e) {
+      tiltX = e.gamma || 0;
+      tiltY = e.beta || 0;
+    }
+
+    function requestPermission() {
+      if (typeof DeviceOrientationEvent !== 'undefined' && 
+          typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+          .then(response => {
+            if (response === 'granted') {
+              permissionPopup.style.display = 'none';
+              startButton.style.display = 'block';
+              window.addEventListener('deviceorientation', handleOrientation);
+            } else {
+              alert('Das Spiel benötigt Sensorzugriff');
+            }
+          })
+          .catch(console.error);
+      } else {
+        permissionPopup.style.display = 'none';
+        startButton.style.display = 'block';
+        window.addEventListener('deviceorientation', handleOrientation);
+      }
+    }
+
+function startCountdown() {
+  startButton.style.display = 'none';
+  ball.style.transform = 'translate(-50%, -50%) scale(1)';
+
+  let count = 5;
+  countdownEl.textContent = count;
+  countdownEl.style.display = 'block';
+
+  const countdownInterval = setInterval(() => {
+    count--;
+    countdownEl.textContent = count;
+
+    if (count <= 0) {
+      clearInterval(countdownInterval);
+      countdownEl.style.display = 'none';
+      startGame();
+    }
+  }, 1000);
+}
+
 
     function startGame() {
+      x = window.innerWidth / 2;
+      y = window.innerHeight / 2;
+      updateBallPosition();
       active = true;
       startTime = Date.now();
-      requestAnimationFrame(update);
-
-      setInterval(() => {
-        const angle = Math.random() * 2 * Math.PI;
-        windX = Math.cos(angle);
-        windY = Math.sin(angle);
-      }, 3000);
-
-      setInterval(() => {
-        if (active) spawnWindBurst();
-      }, 2000 + Math.random() * 2000);
+      requestAnimationFrame(gameLoop);
     }
 
-    function spawnWindBurst() {
-      const angle = Math.random() * 2 * Math.PI;
-      const strength = 1 + Math.random() * 2;
-      const duration = 1500 + Math.random() * 1000;
-      const vx = Math.cos(angle);
-      const vy = Math.sin(angle);
-
-      const arrow = document.createElement("div");
-      arrow.style.top = `${Math.random() * window.innerHeight}px`;
-      arrow.style.left = `${Math.random() * window.innerWidth}px`;
-      arrow.style.transform = `rotate(${angle * 180 / Math.PI}deg)`;
-      windArrows.appendChild(arrow);
-
-      const burst = { vx, vy, strength, end: Date.now() + duration, arrow };
-      windBursts.push(burst);
-
-      setTimeout(() => {
-        arrow.remove();
-        windBursts = windBursts.filter(b => b !== burst);
-      }, duration);
+    function updateScores() {
+      const topScores = scores.sort((a,b) => b-a).slice(0, 5);
+      scoresEl.innerHTML = 'Bestenliste:<br>' +
+        topScores.map((s, i) => `${i + 1}. ${s.toFixed(1)}s`).join('<br>');
     }
 
-    function update() {
+    function updateBallPosition() {
+      ball.style.left = `${x - ball.offsetWidth / 2}px`;
+      ball.style.top = `${y - ball.offsetHeight / 2}px`;
+    }
+
+    function updateBall() {
       if (!active) return;
 
-      const elapsed = (Date.now() - startTime) / 1000;
-      const windStrength = 0.2 + elapsed / 20 * parseInt(difficultySlider.value);
+      gameDuration = (Date.now() - startTime) / 1000;
 
-      let totalWindX = windX * windStrength;
-      let totalWindY = windY * windStrength;
+      x += tiltX * speed + windForce.x;
+      y += tiltY * speed + windForce.y;
 
-      windBursts.forEach(burst => {
-        totalWindX += burst.vx * burst.strength;
-        totalWindY += burst.vy * burst.strength;
-      });
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const dx = x - cx;
+      const dy = y - cy;
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-      x += tiltX * 5 + totalWindX;
-      y += tiltY * 5 + totalWindY;
-
-      if (x < 0 || x > window.innerWidth || y < 0 || y > window.innerHeight) {
-        gameOver();
+      if (distance > 750) {
+        active = false;
+        const finalTime = ((Date.now() - startTime)/1000).toFixed(1);
+        gameOverText.innerText = `Game Over! Zeit: ${finalTime}s`;
+        gameOver.style.display = 'flex';
+        scores.push(parseFloat(finalTime));
+        updateScores();
         return;
       }
 
-      ball.style.left = `${x}px`;
-      ball.style.top = `${y}px`;
-      requestAnimationFrame(update);
+      updateBallPosition();
     }
 
-    function gameOver() {
-      active = false;
-      gameOverText.textContent = `Game Over! Zeit: ${((Date.now() - startTime) / 1000).toFixed(1)}s`;
-      gameOverScreen.style.display = "flex";
+    function gameLoop() {
+      if (active) {
+        updateBall();
+        speed += 0.0005;
+        requestAnimationFrame(gameLoop);
+      }
     }
 
-    window.addEventListener("deviceorientation", e => {
-      tiltX = e.gamma / 45;
-      tiltY = e.beta / 45;
-    });
+    function activateWind() {
+      if (!active) return;
+      windActive = true;
+
+      const angle = Math.random() * 2 * Math.PI;
+      const baseStrength = 0.8 + (gameDuration / 30); 
+      const strength = baseStrength + Math.random() * baseStrength + speed / 3;
+      windForce.x = Math.cos(angle) * strength;
+      windForce.y = Math.sin(angle) * strength;
+
+      wind.style.left = `${x - 75}px`;
+      wind.style.top = `${y - 75}px`;
+      wind.style.display = 'block';
+
+      setTimeout(() => {
+        windForce = {x: 0, y: 0};
+        wind.style.display = 'none';
+        windActive = false;
+      }, 2000);
+    }
+
+    permissionButton.onclick = requestPermission;
+    startButton.onclick = startCountdown; // Geändert zu startCountdown
+
+    restartButton.onclick = () => {
+      gameOver.style.display = 'none';
+      x = window.innerWidth / 2;
+      y = window.innerHeight / 2;
+      speed = 0.5;
+      ball.style.transform = 'translate(-50%, -50%) scale(2)'; // Ball wieder groß
+      startButton.style.display = 'block'; // Start-Button wieder anzeigen
+    };
+
+    setInterval(() => {
+      if (active && !windActive) activateWind();
+    }, 3000);
+
+    const sensitivitySlider = document.getElementById('sensitivitySlider');
+sensitivitySlider.oninput = () => {
+  speed = parseFloat(sensitivitySlider.value);
+};
+
   </script>
 </body>
 </html>
