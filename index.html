@@ -227,174 +227,194 @@
     </div>
   </div>
 
-  <script>
-    const ball = document.getElementById('ball');
-    const wind = document.getElementById('wind');
-    const gameOver = document.getElementById('gameOver');
-    const gameOverText = document.getElementById('gameOverText');
-    const startButton = document.getElementById('startButton');
-    const restartButton = document.getElementById('restartButton');
-    const scoresEl = document.getElementById('scores');
-    const permissionPopup = document.getElementById('permissionPopup');
-    const permissionButton = document.getElementById('permissionButton');
-    const countdownEl = document.getElementById('countdown');
+<script>
+  const ball = document.getElementById('ball');
+  const wind = document.getElementById('wind');
+  const gameOver = document.getElementById('gameOver');
+  const gameOverText = document.getElementById('gameOverText');
+  const startButton = document.getElementById('startButton');
+  const restartButton = document.getElementById('restartButton');
+  const scoresEl = document.getElementById('scores');
+  const permissionPopup = document.getElementById('permissionPopup');
+  const permissionButton = document.getElementById('permissionButton');
+  const countdownEl = document.getElementById('countdown');
 
-    let x = window.innerWidth / 2;
-    let y = window.innerHeight / 2;
-    let speed = 0.5;
-    let active = false;
-    let startTime = 0;
-    let windForce = {x: 0, y: 0};
-    let windActive = false;
-    let gameDuration = 0;
-    let scores = [];
+  // Windanzeige-Element erstellen
+  const windArrow = document.createElement('div');
+  windArrow.style.position = 'absolute';
+  windArrow.style.top = '10px';
+  windArrow.style.right = '10px';
+  windArrow.style.width = '80px';
+  windArrow.style.height = '80px';
+  windArrow.style.border = '3px solid cyan';
+  windArrow.style.borderRadius = '50%';
+  windArrow.style.display = 'flex';
+  windArrow.style.alignItems = 'center';
+  windArrow.style.justifyContent = 'center';
+  windArrow.style.transform = 'rotate(0deg)';
+  windArrow.style.transition = 'transform 0.5s ease';
+  windArrow.style.fontSize = '20px';
+  windArrow.style.color = 'cyan';
+  windArrow.style.zIndex = '100';
+  document.body.appendChild(windArrow);
 
-    let tiltX = 0, tiltY = 0;
+  const arrowPointer = document.createElement('div');
+  arrowPointer.style.width = '0';
+  arrowPointer.style.height = '0';
+  arrowPointer.style.borderLeft = '10px solid transparent';
+  arrowPointer.style.borderRight = '10px solid transparent';
+  arrowPointer.style.borderBottom = '20px solid cyan';
+  windArrow.appendChild(arrowPointer);
 
-    function handleOrientation(e) {
-      tiltX = e.gamma || 0;
-      tiltY = e.beta || 0;
+  const windStrengthLabel = document.createElement('div');
+  windStrengthLabel.style.position = 'absolute';
+  windStrengthLabel.style.top = '100px';
+  windStrengthLabel.style.right = '20px';
+  windStrengthLabel.style.color = 'cyan';
+  windStrengthLabel.style.fontSize = '20px';
+  windStrengthLabel.style.zIndex = '100';
+  document.body.appendChild(windStrengthLabel);
+
+  let x = window.innerWidth / 2;
+  let y = window.innerHeight / 2;
+  let speed = 0.5;
+  let active = false;
+  let startTime = 0;
+  let windX = 0, windY = 0;
+  let scores = [];
+  let tiltX = 0, tiltY = 0;
+
+  function handleOrientation(e) {
+    tiltX = e.gamma || 0;
+    tiltY = e.beta || 0;
+  }
+
+  function requestPermission() {
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(response => {
+          if (response === 'granted') {
+            permissionPopup.style.display = 'none';
+            startButton.style.display = 'block';
+            window.addEventListener('deviceorientation', handleOrientation);
+          } else {
+            alert('Das Spiel benötigt Sensorzugriff');
+          }
+        })
+        .catch(console.error);
+    } else {
+      permissionPopup.style.display = 'none';
+      startButton.style.display = 'block';
+      window.addEventListener('deviceorientation', handleOrientation);
     }
+  }
 
-    function requestPermission() {
-      if (typeof DeviceOrientationEvent !== 'undefined' && 
-          typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission()
-          .then(response => {
-            if (response === 'granted') {
-              permissionPopup.style.display = 'none';
-              startButton.style.display = 'block';
-              window.addEventListener('deviceorientation', handleOrientation);
-            } else {
-              alert('Das Spiel benötigt Sensorzugriff');
-            }
-          })
-          .catch(console.error);
-      } else {
-        permissionPopup.style.display = 'none';
-        startButton.style.display = 'block';
-        window.addEventListener('deviceorientation', handleOrientation);
-      }
-    }
+  function startCountdown() {
+    startButton.style.display = 'none';
+    ball.style.transform = 'translate(-50%, -50%) scale(1)';
 
-function startCountdown() {
-  startButton.style.display = 'none';
-  ball.style.transform = 'translate(-50%, -50%) scale(1)';
-
-  let count = 5;
-  countdownEl.textContent = count;
-  countdownEl.style.display = 'block';
-
-  const countdownInterval = setInterval(() => {
-    count--;
+    let count = 5;
     countdownEl.textContent = count;
+    countdownEl.style.display = 'block';
 
-    if (count <= 0) {
-      clearInterval(countdownInterval);
-      countdownEl.style.display = 'none';
-      startGame();
+    const countdownInterval = setInterval(() => {
+      count--;
+      countdownEl.textContent = count;
+
+      if (count <= 0) {
+        clearInterval(countdownInterval);
+        countdownEl.style.display = 'none';
+        startGame();
+      }
+    }, 1000);
+  }
+
+  function startGame() {
+    x = window.innerWidth / 2;
+    y = window.innerHeight / 2;
+    updateBallPosition();
+    active = true;
+    startTime = Date.now();
+
+    // Neuer Wind
+    const angle = Math.random() * 2 * Math.PI;
+    windX = Math.cos(angle);
+    windY = Math.sin(angle);
+
+    updateWindDisplay();
+    requestAnimationFrame(gameLoop);
+  }
+
+  function updateScores() {
+    const topScores = scores.sort((a, b) => b - a).slice(0, 5);
+    scoresEl.innerHTML = 'Bestenliste:<br>' +
+      topScores.map((s, i) => `${i + 1}. ${s.toFixed(1)}s`).join('<br>');
+  }
+
+  function updateBallPosition() {
+    ball.style.left = `${x - ball.offsetWidth / 2}px`;
+    ball.style.top = `${y - ball.offsetHeight / 2}px`;
+  }
+
+  function updateBall() {
+    if (!active) return;
+
+    const time = (Date.now() - startTime) / 1000;
+    const windStrength = 0.3 + time / 30; // Wind nimmt mit Zeit zu
+
+    // Windanzeige aktualisieren
+    updateWindDisplay(windStrength);
+
+    x += tiltX * speed + windX * windStrength;
+    y += tiltY * speed + windY * windStrength;
+
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const dx = x - cx;
+    const dy = y - cy;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance > 750) {
+      active = false;
+      const finalTime = ((Date.now() - startTime) / 1000).toFixed(1);
+      gameOverText.innerText = `Game Over! Zeit: ${finalTime}s`;
+      gameOver.style.display = 'flex';
+      scores.push(parseFloat(finalTime));
+      updateScores();
+      return;
     }
-  }, 1000);
-}
 
+    updateBallPosition();
+  }
 
-    function startGame() {
-      x = window.innerWidth / 2;
-      y = window.innerHeight / 2;
-      updateBallPosition();
-      active = true;
-      startTime = Date.now();
+  function updateWindDisplay(strength = 1) {
+    const angleDeg = Math.atan2(windY, windX) * 180 / Math.PI;
+    windArrow.style.transform = `rotate(${angleDeg}deg)`;
+    windStrengthLabel.innerText = `Windstärke: ${strength.toFixed(1)}`;
+  }
+
+  function gameLoop() {
+    if (active) {
+      updateBall();
+      speed += 0.0005;
       requestAnimationFrame(gameLoop);
     }
+  }
 
-    function updateScores() {
-      const topScores = scores.sort((a,b) => b-a).slice(0, 5);
-      scoresEl.innerHTML = 'Bestenliste:<br>' +
-        topScores.map((s, i) => `${i + 1}. ${s.toFixed(1)}s`).join('<br>');
-    }
+  permissionButton.onclick = requestPermission;
+  startButton.onclick = startCountdown;
 
-    function updateBallPosition() {
-      ball.style.left = `${x - ball.offsetWidth / 2}px`;
-      ball.style.top = `${y - ball.offsetHeight / 2}px`;
-    }
+  restartButton.onclick = () => {
+    gameOver.style.display = 'none';
+    x = window.innerWidth / 2;
+    y = window.innerHeight / 2;
+    speed = 0.5;
+    ball.style.transform = 'translate(-50%, -50%) scale(2)';
+    startButton.style.display = 'block';
+    windStrengthLabel.innerText = '';
+  };
+</script>
 
-    function updateBall() {
-      if (!active) return;
-
-      gameDuration = (Date.now() - startTime) / 1000;
-
-      x += tiltX * speed + windForce.x;
-      y += tiltY * speed + windForce.y;
-
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      const dx = x - cx;
-      const dy = y - cy;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (distance > 750) {
-        active = false;
-        const finalTime = ((Date.now() - startTime)/1000).toFixed(1);
-        gameOverText.innerText = `Game Over! Zeit: ${finalTime}s`;
-        gameOver.style.display = 'flex';
-        scores.push(parseFloat(finalTime));
-        updateScores();
-        return;
-      }
-
-      updateBallPosition();
-    }
-
-    function gameLoop() {
-      if (active) {
-        updateBall();
-        speed += 0.0005;
-        requestAnimationFrame(gameLoop);
-      }
-    }
-
-    function activateWind() {
-      if (!active) return;
-      windActive = true;
-
-      const angle = Math.random() * 2 * Math.PI;
-      const baseStrength = 0.8 + (gameDuration / 30); 
-      const strength = baseStrength + Math.random() * baseStrength + speed / 3;
-      windForce.x = Math.cos(angle) * strength;
-      windForce.y = Math.sin(angle) * strength;
-
-      wind.style.left = `${x - 75}px`;
-      wind.style.top = `${y - 75}px`;
-      wind.style.display = 'block';
-
-      setTimeout(() => {
-        windForce = {x: 0, y: 0};
-        wind.style.display = 'none';
-        windActive = false;
-      }, 2000);
-    }
-
-    permissionButton.onclick = requestPermission;
-    startButton.onclick = startCountdown; // Geändert zu startCountdown
-
-    restartButton.onclick = () => {
-      gameOver.style.display = 'none';
-      x = window.innerWidth / 2;
-      y = window.innerHeight / 2;
-      speed = 0.5;
-      ball.style.transform = 'translate(-50%, -50%) scale(2)'; // Ball wieder groß
-      startButton.style.display = 'block'; // Start-Button wieder anzeigen
-    };
-
-    setInterval(() => {
-      if (active && !windActive) activateWind();
-    }, 3000);
-
-    const sensitivitySlider = document.getElementById('sensitivitySlider');
-sensitivitySlider.oninput = () => {
-  speed = parseFloat(sensitivitySlider.value);
-};
-
-  </script>
 </body>
 </html>
