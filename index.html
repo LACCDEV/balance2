@@ -355,6 +355,11 @@ function startGame() {
       ball.style.top = `${y - ball.offsetHeight / 2}px`;
     }
 
+    function updateBallPosition() {
+      ball.style.left = `${x - ball.offsetWidth / 2}px`;
+      ball.style.top = `${y - ball.offsetHeight / 2}px`;
+    }
+
     function updateBall() {
       if (!active) return;
 
@@ -363,9 +368,8 @@ function startGame() {
       x += tiltX * speed + windForce.x;
       y += tiltY * speed + windForce.y;
 
-const cx = 800; // Mittelpunkt der gameArea
-const cy = 800; // Mittelpunkt der gameArea
-
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
       const dx = x - cx;
       const dy = y - cy;
       const distance = Math.sqrt(dx * dx + dy * dy);
@@ -373,7 +377,7 @@ const cy = 800; // Mittelpunkt der gameArea
       if (distance > 500) {
         active = false;
         const finalTime = ((Date.now() - startTime)/1000).toFixed(1);
-        gameOverText.innerText = Game Over! Zeit: ${finalTime}s;
+        gameOverText.innerText = `Game Over! Zeit: ${finalTime}s`;
         gameOver.style.display = 'flex';
         scores.push(parseFloat(finalTime));
         updateScores();
@@ -383,7 +387,6 @@ const cy = 800; // Mittelpunkt der gameArea
       updateBallPosition();
     }
 
-
     function gameLoop() {
       if (active) {
         updateBall();
@@ -391,7 +394,6 @@ const cy = 800; // Mittelpunkt der gameArea
         requestAnimationFrame(gameLoop);
       }
     }
-
 function activateWind() {
   if (!active) return;
   windActive = true;
