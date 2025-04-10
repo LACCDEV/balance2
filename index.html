@@ -362,26 +362,31 @@ function startCountdown() {
       }
     }
 
-    function activateWind() {
-      if (!active) return;
-      windActive = true;
+function activateWind() {
+  if (!active) return;
+  windActive = true;
 
-      const angle = Math.random() * 2 * Math.PI;
-      const baseStrength = 0.8 + (gameDuration / 30); 
-      const strength = baseStrength + Math.random() * baseStrength + speed / 3;
-      windForce.x = Math.cos(angle) * strength;
-      windForce.y = Math.sin(angle) * strength;
+  const angle = Math.random() * 2 * Math.PI;
 
-      wind.style.left = `${x - 75}px`;
-      wind.style.top = `${y - 75}px`;
-      wind.style.display = 'block';
+  // Stärke nimmt mit Spielzeit zu (quadratisch oder exponentiell z. B.)
+  const base = 1;
+  const scaling = Math.min(gameDuration / 20, 5); // Begrenzen auf Faktor 5
+  const strength = base + scaling * scaling + speed / 2; // quadratische Verstärkung
 
-      setTimeout(() => {
-        windForce = {x: 0, y: 0};
-        wind.style.display = 'none';
-        windActive = false;
-      }, 2000);
-    }
+  windForce.x = Math.cos(angle) * strength;
+  windForce.y = Math.sin(angle) * strength;
+
+  wind.style.left = `${x - 75}px`;
+  wind.style.top = `${y - 75}px`;
+  wind.style.display = 'block';
+
+  setTimeout(() => {
+    windForce = {x: 0, y: 0};
+    wind.style.display = 'none';
+    windActive = false;
+  }, 2000);
+}
+
 
     permissionButton.onclick = requestPermission;
     startButton.onclick = startCountdown; // Geändert zu startCountdown
