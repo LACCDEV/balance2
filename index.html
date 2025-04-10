@@ -205,6 +205,28 @@
   margin: 0 15px;
 }
 
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 40px; /* größere Touch-Zone */
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 32px;
+  width: 32px;
+  background: #4CAF50;
+  border-radius: 50%;
+  border: none;
+  margin-top: -14px; /* Damit der Thumb mittig sitzt */
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #ccc;
+  border-radius: 3px;
+}
 
 
   </style>
