@@ -355,35 +355,30 @@ function startGame() {
       ball.style.top = `${y - ball.offsetHeight / 2}px`;
     }
 
-function updateBall() {
-  if (!active) return;
+    function updateBall() {
+      if (!active) return;
 
-  // Berechnung des Mittelpunkts des sichtbaren Viewports
-  const cx = window.innerWidth / 2;
-  const cy = window.innerHeight / 2;
+      gameDuration = (Date.now() - startTime) / 1000;
 
-  // Update der Ballposition basierend auf den Neigungsdaten
-  x += tiltX * speed + windForce.x;
-  y += tiltY * speed + windForce.y;
+      x += tiltX * speed + windForce.x;
+      y += tiltY * speed + windForce.y;
 
-  // Berechnung des Abstands zum Mittelpunkt
-  const dx = x - cx;
-  const dy = y - cy;
-  const distance = Math.sqrt(dx * dx + dy * dy);
+const cx = 800; // Mittelpunkt der gameArea
+const cy = 800; // Mittelpunkt der gameArea
 
-  // Setze hier den maximalen Abstand, bevor das Spiel endet (50% des Viewports)
-  const maxDistance = Math.min(window.innerWidth, window.innerHeight) / 2; 
+      const dx = x - cx;
+      const dy = y - cy;
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-  // Wenn der Ball den maximalen Abstand überschreitet, endet das Spiel
-  if (distance > maxDistance) {
-    active = false;
-    const finalTime = ((Date.now() - startTime) / 1000).toFixed(1);
-    gameOverText.innerText = `Game Over! Zeit: ${finalTime}s`;
-    gameOver.style.display = 'flex';
-    scores.push(parseFloat(finalTime));
-    updateScores();
-    return;
-  }
+      if (distance > 500) {
+        active = false;
+        const finalTime = ((Date.now() - startTime)/1000).toFixed(1);
+        gameOverText.innerText = Game Over! Zeit: ${finalTime}s;
+        gameOver.style.display = 'flex';
+        scores.push(parseFloat(finalTime));
+        updateScores();
+        return;
+      }
 
   updateBallPosition();
 }
