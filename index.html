@@ -287,15 +287,9 @@ input[type="range"]::-webkit-slider-runnable-track {
   <script>
 
 
-function isSmartphoneDevice() {
-  const ua = navigator.userAgent || navigator.vendor || window.opera;
-  return /android.+mobile|iphone|ipod/i.test(ua);
-}
-
-if (!isSmartphoneDevice()) {
-  document.getElementById('pcOnlyPopup').style.display = 'flex';
-}
-
+const isMobile = navigator.userAgentData
+  ? navigator.userAgentData.mobile
+  : /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 
     const ball = document.getElementById('ball');
