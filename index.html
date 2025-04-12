@@ -3,12 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Leitz Balance Board</title>
-
-<div id="sensitivityControl">
-  <label for="sensitivitySlider">Schwierigkeit:</label>
-  <input type="range" id="sensitivitySlider" min="0.1" max="3" value="0.5" step="0.1">
-  <span id="sensitivityValue">0.5</span>
-</div>
   
   <style>
     html, body {
@@ -270,7 +264,7 @@ input[type="range"]::-webkit-slider-runnable-track {
   <button id="startButton">START</button>
   <div id="scores"></div>
   <div id="countdown"></div>
-
+  
   <div id="gameArea">
     <div class="ring" style="width: 900px; height: 900px;"></div>
     <div class="ring" style="width: 1200px; height: 1200px;"></div>
@@ -284,6 +278,12 @@ input[type="range"]::-webkit-slider-runnable-track {
     </div>
   </div>
 
+    <div id="sensitivityControl">
+  <label for="sensitivitySlider">Schwierigkeit:</label>
+  <input type="range" id="sensitivitySlider" min="0.1" max="3" value="0.5" step="0.1">
+  <span id="sensitivityValue">0.5</span>
+</div>
+  
   <script>
 
 
@@ -491,6 +491,11 @@ sensitivitySlider.oninput = () => {
       document.getElementById('pcOnlyPopup').style.display = 'flex';
     }
   };
+
+    // Zeige den "Nur auf dem Smartphone verfügbar"-Popup, wenn KEIN Smartphone erkannt wird
+if (!isMobile) {
+  document.getElementById("pcOnlyPopup").style.display = "flex";
+}
 
 
   </script>
