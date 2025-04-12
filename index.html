@@ -225,7 +225,6 @@ input[type="range"]::-webkit-slider-runnable-track {
 }
 
     #pcOnlyPopup {
-  display: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -235,7 +234,7 @@ input[type="range"]::-webkit-slider-runnable-track {
   color: white;
   z-index: 999;
   font-size: 32px;
-  display: flex;
+  display: none; /* Wichtig: Standardmäßig ausgeblendet */
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -287,10 +286,11 @@ input[type="range"]::-webkit-slider-runnable-track {
   <script>
 
 
-const isMobile = navigator.userAgentData
-  ? navigator.userAgentData.mobile
-  : /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
+    // Funktion zum Erkennen von Mobilgeräten
+    function checkIfMobile() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+        .test(navigator.userAgent);
+    }
 
     const ball = document.getElementById('ball');
     const wind = document.getElementById('wind');
@@ -479,23 +479,15 @@ sensitivitySlider.oninput = () => {
   sensitivityValue.textContent = speed.toFixed(1);
 };
 
-  // Funktion zum Erkennen von Mobilgeräten
-  function isMobile() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
-      .test(navigator.userAgent);
-  }
-
-  // Wenn kein Mobilgerät → zeige Hinweis
-  window.onload = () => {
-    if (!isMobile()) {
-      document.getElementById('pcOnlyPopup').style.display = 'flex';
-    }
-  };
-
-    // Zeige den "Nur auf dem Smartphone verfügbar"-Popup, wenn KEIN Smartphone erkannt wird
-if (!isMobile) {
-  document.getElementById("pcOnlyPopup").style.display = "flex";
-}
+    // Wenn kein Mobilgerät → zeige Hinweis
+    window.onload = () => {
+      if (!checkIfMobile()) {
+        document.getElementById('pcOnlyPopup').style.display = 'flex';
+      } else {
+        // Nur auf Mobilgeräten: Berechtigungs-Popup anzeigen
+        permissionPopup.style.display = 'flex';
+      }
+    };
 
 
   </script>
