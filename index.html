@@ -286,11 +286,16 @@ input[type="range"]::-webkit-slider-runnable-track {
 
   <script>
 
-const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || navigator.maxTouchPoints > 2;
 
-if (!isMobile) {
+function isSmartphoneDevice() {
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  return /android.+mobile|iphone|ipod/i.test(ua);
+}
+
+if (!isSmartphoneDevice()) {
   document.getElementById('pcOnlyPopup').style.display = 'flex';
 }
+
 
 
     const ball = document.getElementById('ball');
