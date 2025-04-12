@@ -4,11 +4,6 @@
   <meta charset="UTF-8">
   <title>Leitz Balance Board</title>
 
-  <div id="pcOnlyPopup">
-  <h2>Nur auf dem Smartphone verfügbar</h2>
-  <p>Bitte öffne diese Seite auf einem mobilen Gerät.</p>
-</div>
-
 <div id="sensitivityControl">
   <label for="sensitivitySlider">Schwierigkeit:</label>
   <input type="range" id="sensitivitySlider" min="0.1" max="3" value="0.5" step="0.1">
@@ -265,6 +260,11 @@ input[type="range"]::-webkit-slider-runnable-track {
     <button id="permissionButton">Erlauben</button>
   </div>
 
+    <div id="pcOnlyPopup">
+  <h2>Nur auf dem Smartphone verfügbar</h2>
+  <p>Bitte öffne diese Seite auf einem mobilen Gerät.</p>
+</div>
+  
   <div id="leitz">LEITZ</div> <!-- "LEITZ" oben mittig hinzugefügt -->
   
   <button id="startButton">START</button>
@@ -286,9 +286,12 @@ input[type="range"]::-webkit-slider-runnable-track {
 
   <script>
 
-    if (!/Mobi|Android/i.test(navigator.userAgent)) {
+const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || navigator.maxTouchPoints > 2;
+
+if (!isMobile) {
   document.getElementById('pcOnlyPopup').style.display = 'flex';
 }
+
 
     const ball = document.getElementById('ball');
     const wind = document.getElementById('wind');
